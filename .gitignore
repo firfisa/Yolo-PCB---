@@ -3,6 +3,7 @@ PCB_瑕疵测试集
 # OS-specific files (macOS)
 .DS_Store
 yolo.tar.gz
+test_evaluation_results
 
 ############################
 # Python 通用
