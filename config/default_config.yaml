@@ -1,0 +1,39 @@
+# Default configuration for PCB defect detection system
+
+model:
+  name: "yolov8n"
+  num_classes: 5
+  input_size: 640
+  pretrained: true
+
+training:
+  epochs: 300
+  batch_size: 16
+  learning_rate: 0.01
+  patience: 50
+  save_period: 10
+  device: "auto"
+  workers: 8
+
+data:
+  train_path: "训练集-PCB_DATASET"
+  test_path: "PCB_瑕疵测试集"
+  augmentation: true
+  train_split: 0.8
+  val_split: 0.2
+
+evaluation:
+  iou_threshold: 0.5
+  confidence_threshold: 0.25
+  save_results: true
+  results_format: "json"
+
+visualization:
+  save_visualizations: true
+  output_dir: "outputs/visualizations"
+  grid_size: [2, 2]
+  
+logging:
+  level: "INFO"
+  save_logs: true
+  log_dir: "logs"

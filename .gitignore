@@ -1,0 +1,93 @@
+训练集-PCB_DATASET
+PCB_瑕疵测试集
+# OS-specific files (macOS)
+.DS_Store
+
+############################
+# Python 通用
+############################
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.Python
+.env
+.venv
+venv/
+ENV/
+env/
+
+############################
+# Python 打包 / 构建
+############################
+build/
+dist/
+*.egg-info/
+.eggs/
+
+############################
+# Jupyter / 临时文件
+############################
+.ipynb_checkpoints/
+*.log
+*.tmp
+*.swp
+.DS_Store
+
+############################
+# IDE / 编辑器
+############################
+.vscode/
+.idea/
+*.code-workspace
+
+############################
+# 训练过程产生的文件
+############################
+# checkpoint / 模型权重
+checkpoints/
+weights/
+*.pth
+*.pt
+*.ckpt
+
+############################
+# 数据集（一般不提交）
+############################
+data/raw/
+data/processed/
+data/cache/
+data/*.zip
+data/*.tar
+data/*.tar.gz
+
+############################
+# 训练与评估输出
+############################
+runs/
+outputs/
+results/
+logs/
+
+############################
+# 可视化结果
+############################
+visualization/output/
+visualization/figures/
+*.png
+*.jpg
+*.jpeg
+
+############################
+# 配置文件（如果包含本地路径）
+############################
+config/local.yaml
+config/*.local.yaml
+
+############################
+# Mac / Linux
+############################
+.DS_Store
+.Trashes
+Thumbs.db
