@@ -114,16 +114,18 @@ class YOLOBackbone(nn.Module):
 
 
 class YOLONeck(nn.Module):
-    """YOLO neck with FPN and PANet."""
+    """YOLO neck with FPN and PANet, enhanced with attention mechanisms."""
     
-    def __init__(self, channels: List[int]):
+    def __init__(self, channels: List[int], attention_type: Optional[str] = None):
         """
         Initialize YOLO neck.
         
         Args:
             channels: Channel dimensions for each feature level
+            attention_type: Type of attention mechanism to integrate
         """
         super().__init__()
+        self.attention_type = attention_type
         
         # Top-down pathway (FPN)
         self.fpn_conv1 = nn.Conv2d(channels[2], channels[1], 1, bias=False)
@@ -137,6 +139,16 @@ class YOLONeck(nn.Module):
         self.out_conv1 = self._make_conv_block(channels[0], channels[0])
         self.out_conv2 = self._make_conv_block(channels[1], channels[1])
         self.out_conv3 = self._make_conv_block(channels[2], channels[2])
+        
+        # Add attention mechanisms to neck if specified
+        if attention_type:
+            self.neck_attention1 = AttentionBlock(channels[0], attention_type)
+            self.neck_attention2 = AttentionBlock(channels[1], attention_type)
+            self.neck_attention3 = AttentionBlock(channels[2], attention_type)
+        else:
+            self.neck_attention1 = nn.Identity()
+            self.neck_attention2 = nn.Identity()
+            self.neck_attention3 = nn.Identity()
         
     def _make_conv_block(self, in_channels: int, out_channels: int) -> nn.Module:
         """Create convolution block."""
@@ -166,10 +178,15 @@ class YOLONeck(nn.Module):
         pan_p5 = self.pan_conv2(pan_p4)
         pan_p5 = pan_p5 + p5
         
-        # Output features
+        # Output features with attention
         out_p3 = self.out_conv1(fpn_p3)
+        out_p3 = self.neck_attention1(out_p3)
+        
         out_p4 = self.out_conv2(pan_p4)
+        out_p4 = self.neck_attention2(out_p4)
+        
         out_p5 = self.out_conv3(pan_p5)
+        out_p5 = self.neck_attention3(out_p5)
         
         return [out_p3, out_p4, out_p5]
 
@@ -228,7 +245,7 @@ class YOLODetector(ModelInterface):
         
         # Build components
         self.backbone = YOLOBackbone(self.model_variant, self.attention_type)
-        self.neck = YOLONeck(channels[1:])  # Skip first channel for neck
+        self.neck = YOLONeck(channels[1:], self.attention_type)  # Skip first channel for neck
         self.head = DetectionHead(channels[1:], self.num_classes, num_anchors=3)
         
         # Move to device

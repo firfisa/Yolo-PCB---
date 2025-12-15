@@ -1,0 +1,87 @@
+{
+  "results": [
+    {
+      "config": {
+        "name": "yolov8n_base",
+        "variant": "yolov8n",
+        "attention_type": null,
+        "use_advanced_loss": false,
+        "use_multiscale": false,
+        "input_size": 640,
+        "description": "Base YOLOv8n model"
+      },
+      "metrics": {
+        "map_50": 0.0,
+        "map_75": 0.0,
+        "map_50_95": 0.0,
+        "ap_per_class": {},
+        "inference_time_ms": 126.20757818222046,
+        "fps": 7.923454473995092,
+        "model_size_mb": 60.896339416503906,
+        "parameters": 15963610,
+        "flops": 39232.167936,
+        "memory_usage_mb": 0.0,
+        "training_time_hours": 0.0,
+        "convergence_epoch": 0
+      },
+      "notes": "Benchmark completed successfully"
+    },
+    {
+      "config": {
+        "name": "yolov8n_cbam",
+        "variant": "yolov8n",
+        "attention_type": "cbam",
+        "use_advanced_loss": false,
+        "use_multiscale": false,
+        "input_size": 640,
+        "description": "YOLOv8n with CBAM attention"
+      },
+      "metrics": {
+        "map_50": 0.0,
+        "map_75": 0.0,
+        "map_50_95": 0.0,
+        "ap_per_class": {},
+        "inference_time_ms": 137.4186110496521,
+        "fps": 7.27703469247466,
+        "model_size_mb": 61.226707458496094,
+        "parameters": 16050214,
+        "flops": 39445.0059264,
+        "memory_usage_mb": 0.0,
+        "training_time_hours": 0.0,
+        "convergence_epoch": 0
+      },
+      "notes": "Benchmark completed successfully"
+    },
+    {
+      "config": {
+        "name": "yolov8s_base",
+        "variant": "yolov8s",
+        "attention_type": null,
+        "use_advanced_loss": false,
+        "use_multiscale": false,
+        "input_size": 640,
+        "description": "Base YOLOv8s model"
+      },
+      "metrics": {
+        "map_50": 0.0,
+        "map_75": 0.0,
+        "map_50_95": 0.0,
+        "ap_per_class": {},
+        "inference_time_ms": 124.20695543289185,
+        "fps": 8.051078915144112,
+        "model_size_mb": 60.896339416503906,
+        "parameters": 15963610,
+        "flops": 39232.167936,
+        "memory_usage_mb": 0.0,
+        "training_time_hours": 0.0,
+        "convergence_epoch": 0
+      },
+      "notes": "Benchmark completed successfully"
+    }
+  ],
+  "analysis": {
+    "total_models": 3,
+    "successful_models": 3,
+    "failed_models": 0,
+    "parameters_stats": {
+      "min": 
