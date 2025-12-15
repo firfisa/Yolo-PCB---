@@ -5,6 +5,7 @@ from .detection_head import DetectionHead, FeaturePyramidNetwork, PANet
 from .attention import CBAM, SEBlock, ECA, CoordAttention, AttentionBlock
 from .losses import FocalLoss, IoULoss, ClassBalancedLoss, ComboLoss
 from .postprocessing import NMSProcessor, SoftNMSProcessor, PostProcessor, MultiScalePostProcessor
+from .ensemble import EnsembleMethod, ModelEnsemble
 
 __all__ = [
     "YOLODetector",
@@ -26,4 +27,6 @@ __all__ = [
     "SoftNMSProcessor", 
     "PostProcessor",
     "MultiScalePostProcessor",
+    "EnsembleMethod",
+    "ModelEnsemble",
 ]
