@@ -723,55 +723,151 @@ class ModelComparison:
         print(f"Visualization saved to {plot_path}")
 
 
-def run_model_architecture_comparison():
-    """Run comprehensive model architecture comparison."""
-    print("Starting Model Architecture Comparison")
-    print("=" * 50)
+def run_comprehensive_architecture_comparison():
+    """Run comprehensive model architecture comparison for all YOLO variants and attention mechanisms."""
+    print("Starting Comprehensive Model Architecture Comparison")
+    print("=" * 60)
     
     # Initialize comparison framework
-    comparison = ModelComparison()
+    comparison = ModelComparison(output_dir="model_comparison_results")
     
-    # Create model configurations
+    # Create comprehensive model configurations
     configs = comparison.create_model_configs()
     print(f"Created {len(configs)} model configurations")
     
-    # Run comparison (limit to subset for demo)
-    demo_configs = [
-        config for config in configs 
-        if config.variant in ["yolov8n", "yolov8s"] and 
-        config.attention_type in [None, "cbam", "se"]
-    ]
+    # Run full comparison
+    print(f"Running comprehensive comparison on all {len(configs)} configurations...")
+    print("This may take several minutes...")
     
-    print(f"Running demo comparison on {len(demo_configs)} configurations...")
-    
-    results = comparison.run_comparison(demo_configs)
+    results = comparison.run_comparison(configs)
     
     # Analyze results
     analysis = comparison.analyze_results()
     
     # Save results
-    comparison.save_results("demo_comparison")
+    comparison.save_results("comprehensive_comparison")
     
     # Generate visualizations
     comparison.visualize_results()
     
-    # Print summary
-    print("\n" + "=" * 50)
-    print("Model Architecture Comparison Complete")
+    # Print detailed summary
+    print("\n" + "=" * 60)
+    print("Comprehensive Model Architecture Comparison Complete")
     print(f"Total models tested: {analysis.get('total_models', 0)}")
     print(f"Successful benchmarks: {analysis.get('successful_models', 0)}")
+    print(f"Failed benchmarks: {analysis.get('failed_models', 0)}")
     
+    # Performance analysis by variant
+    successful_results = [r for r in results if "failed" not in r.notes.lower()]
+    
+    if successful_results:
+        print("\n" + "Performance Analysis by YOLO Variant:")
+        print("-" * 50)
+        
+        variant_stats = {}
+        for result in successful_results:
+            variant = result.config.variant
+            if variant not in variant_stats:
+                variant_stats[variant] = []
+            variant_stats[variant].append(result)
+        
+        for variant, variant_results in sorted(variant_stats.items()):
+            avg_params = np.mean([r.metrics.parameters for r in variant_results])
+            avg_fps = np.mean([r.metrics.fps for r in variant_results])
+            avg_size = np.mean([r.metrics.model_size_mb for r in variant_results])
+            
+            print(f"{variant:8s}: {len(variant_results):2d} configs, "
+                  f"Avg: {avg_params/1e6:5.1f}M params, {avg_fps:5.1f} FPS, {avg_size:5.1f}MB")
+    
+    # Attention mechanism analysis
+    if successful_results:
+        print("\n" + "Performance Analysis by Attention Mechanism:")
+        print("-" * 50)
+        
+        attention_stats = {}
+        for result in successful_results:
+            att_type = result.config.attention_type or "none"
+            if att_type not in attention_stats:
+                attention_stats[att_type] = []
+            attention_stats[att_type].append(result)
+        
+        for att_type, att_results in sorted(attention_stats.items()):
+            avg_params = np.mean([r.metrics.parameters for r in att_results])
+            avg_fps = np.mean([r.metrics.fps for r in att_results])
+            avg_inference = np.mean([r.metrics.inference_time_ms for r in att_results])
+            
+            print(f"{att_type:8s}: {len(att_results):2d} configs, "
+                  f"Avg: {avg_params/1e6:5.1f}M params, {avg_fps:5.1f} FPS, {avg_inference:5.1f}ms")
+    
+    # Best models analysis
     if 'best_models' in analysis:
+        print("\n" + "Best Model Configurations:")
+        print("-" * 40)
         best = analysis['best_models']
+        
         if 'fastest' in best:
-            print(f"Fastest model: {best['fastest']['name']} ({best['fastest']['fps']:.1f} FPS)")
+            print(f"Fastest inference: {best['fastest']['name']}")
+            print(f"  - {best['fastest']['fps']:.1f} FPS ({best['fastest']['inference_time_ms']:.2f}ms)")
+        
         if 'smallest' in best:
-            print(f"Smallest model: {best['smallest']['name']} ({best['smallest']['model_size_mb']:.1f} MB)")
+            print(f"Smallest model: {best['smallest']['name']}")
+            print(f"  - {best['smallest']['model_size_mb']:.1f}MB ({best['smallest']['parameters']:,} params)")
+        
         if 'most_efficient' in best:
-            print(f"Most efficient: {best['most_efficient']['name']} "
-                  f"({best['most_efficient']['efficiency_fps_per_mb']:.2f} FPS/MB)")
+            print(f"Most efficient: {best['most_efficient']['name']}")
+            print(f"  - {best['most_efficient']['efficiency_fps_per_mb']:.2f} FPS/MB")
+    
+    # Speed vs Accuracy tradeoff analysis
+    if successful_results:
+        print("\n" + "Speed vs Size Tradeoff Analysis:")
+        print("-" * 40)
+        
+        # Sort by FPS (descending)
+        by_speed = sorted(successful_results, key=lambda r: r.metrics.fps, reverse=True)
+        print("Top 3 fastest models:")
+        for i, result in enumerate(by_speed[:3]):
+            print(f"  {i+1}. {result.config.name}: {result.metrics.fps:.1f} FPS, "
+                  f"{result.metrics.model_size_mb:.1f}MB")
+        
+        # Sort by model size (ascending)
+        by_size = sorted(successful_results, key=lambda r: r.metrics.model_size_mb)
+        print("\nTop 3 smallest models:")
+        for i, result in enumerate(by_size[:3]):
+            print(f"  {i+1}. {result.config.name}: {result.metrics.model_size_mb:.1f}MB, "
+                  f"{result.metrics.fps:.1f} FPS")
+    
+    # Recommendations
+    print("\n" + "Recommendations:")
+    print("-" * 20)
+    
+    if successful_results:
+        # Find balanced model (good FPS and reasonable size)
+        efficiency_scores = []
+        for result in successful_results:
+            # Normalize FPS and inverse of size, then combine
+            fps_norm = result.metrics.fps / max(r.metrics.fps for r in successful_results)
+            size_norm = min(r.metrics.model_size_mb for r in successful_results) / result.metrics.model_size_mb
+            efficiency = (fps_norm + size_norm) / 2
+            efficiency_scores.append((efficiency, result))
+        
+        best_balanced = max(efficiency_scores, key=lambda x: x[0])[1]
+        
+        print(f"For balanced performance: {best_balanced.config.name}")
+        print(f"  - {best_balanced.metrics.fps:.1f} FPS, {best_balanced.metrics.model_size_mb:.1f}MB")
+        
+        # Find best with attention
+        with_attention = [r for r in successful_results if r.config.attention_type]
+        if with_attention:
+            best_attention = max(with_attention, key=lambda r: r.metrics.fps)
+            print(f"For attention-enhanced model: {best_attention.config.name}")
+            print(f"  - {best_attention.metrics.fps:.1f} FPS with {best_attention.config.attention_type} attention")
     
     return results, analysis
+
+
+def run_model_architecture_comparison():
+    """Run comprehensive model architecture comparison (wrapper for backward compatibility)."""
+    return run_comprehensive_architecture_comparison()
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
 Model Name,Variant,Attention Type,Parameters,Model Size (MB),Inference Time (ms),FPS,FLOPs (G),Memory Usage (MB),Notes
-yolov8n_base,yolov8n,None,0,0.00,0.00,0.0,0.00,0.00,Benchmark failed: 'YOLODetector' object has no attribute 'eval'
-yolov8n_cbam,yolov8n,cbam,0,0.00,0.00,0.0,0.00,0.00,Benchmark failed: 'YOLODetector' object has no attribute 'eval'
-yolov8s_base,yolov8s,None,0,0.00,0.00,0.0,0.00,0.00,Benchmark failed: 'YOLODetector' object has no attribute 'eval'
+yolov8n_base,yolov8n,None,15963610,60.90,127.89,7.8,39232.17,0.00,Benchmark completed successfully
+yolov8n_cbam,yolov8n,cbam,16050214,61.23,141.97,7.0,39445.01,0.00,Benchmark completed successfully
+yolov8s_base,yolov8s,None,15963610,60.90,130.07,7.7,39232.17,0.00,Benchmark completed successfully

@@ -1,152 +1,97 @@
-# PCB Defect Detection System
+# PCB瑕疵检测作业 - 简化版
 
-A comprehensive system for detecting PCB defects using YOLO-based object detection. The system can identify and localize five types of PCB defects: Mouse_bite, Open_circuit, Short, Spur, and Spurious_copper.
+这是一个专门为完成PCB瑕疵检测作业设计的简化版本，直接满足作业的三个核心要求。
 
-## Features
+## 🎯 作业要求
 
-- **Multi-class Detection**: Supports 5 PCB defect types
-- **YOLO Integration**: Built on state-of-the-art YOLO architectures
-- **Comprehensive Evaluation**: mAP calculation and per-class metrics
-- **Visualization**: Side-by-side comparison of predictions vs ground truth
-- **Data Augmentation**: Advanced augmentation techniques for better performance
-- **Property-Based Testing**: Rigorous testing with Hypothesis framework
+1. **提供测试集的mAP（IoU=0.5）和单个类别的AP**
+2. **描述哪些方法提高mAP**  
+3. **可视化显示检测结果和GT对比图**
 
-## Project Structure
+## 🚀 快速开始
 
-```
-pcb_detection/
-├── core/                   # Core data types and interfaces
-│   ├── types.py           # Data classes (Detection, EvaluationMetrics, etc.)
-│   └── interfaces.py      # Abstract interfaces for system components
-├── data/                  # Data processing and augmentation
-│   ├── dataset.py         # PCB dataset implementation
-│   └── augmentation.py    # Data augmentation utilities
-├── models/                # Model implementations
-│   ├── yolo_detector.py   # Main YOLO detector class
-│   └── detection_head.py  # Detection head component
-├── training/              # Training management
-│   ├── trainer.py         # Training loop manager
-│   └── checkpoint_manager.py # Model checkpoint handling
-├── evaluation/            # Evaluation and metrics
-│   ├── evaluator.py       # Main evaluator class
-│   └── metrics.py         # Metrics calculation utilities
-├── visualization/         # Visualization and plotting
-│   ├── visualizer.py      # Main visualizer class
-│   └── plotting.py        # Plotting utilities
-└── utils/                 # Utility functions
-    ├── file_utils.py      # File I/O operations
-    ├── image_utils.py     # Image processing utilities
-    └── config_utils.py    # Configuration management
-```
-
-## Installation
-
-1. Clone the repository:
+### 1. 安装依赖
 ```bash
-git clone <repository-url>
-cd pcb-defect-detection
+python install_requirements.py
 ```
 
-2. Install dependencies:
+### 2. 运行作业
 ```bash
-pip install -r requirements.txt
+python run_assignment.py
 ```
 
-3. Install the package in development mode:
-```bash
-pip install -e .
+就这么简单！程序会自动完成所有步骤。
+
+## 📁 数据集结构
+
+确保你的数据集结构如下：
+```
+├── 训练集-PCB_DATASET/
+│   ├── Annotations/
+│   └── images/
+├── PCB_瑕疵测试集/
+│   ├── Mouse_bite_Img/
+│   ├── Mouse_bite_txt/
+│   ├── Open_circuit_Img/
+│   ├── Open_circuit_txt/
+│   └── ...
 ```
 
-## Usage
+## 📊 输出结果
 
-### Basic Usage
+运行完成后会生成：
 
-```python
-from pcb_detection import YOLODetector, Evaluator, Visualizer
-from pcb_detection.core.types import TrainingConfig
+1. **evaluation_report.txt** - 包含：
+   - mAP@IoU=0.5 和各类别AP
+   - 提高mAP的具体方法建议
 
-# Initialize components
-detector = YOLODetector(model_config={}, num_classes=5)
-evaluator = Evaluator(iou_threshold=0.5)
-visualizer = Visualizer(class_names=["Mouse_bite", "Open_circuit", "Short", "Spur", "Spurious_copper"])
+2. **visualization_results/** - 包含：
+   - GT vs 预测结果对比图
+   - 使用单字母标签 (M, O, S, P, C)
+   - 不同颜色区分不同瑕疵类型
 
-# Training configuration
-config = TrainingConfig(
-    model_name="yolov8n",
-    epochs=300,
-    batch_size=16,
-    learning_rate=0.01
-)
-```
+3. **runs/detect/train/** - 包含：
+   - 训练好的YOLO模型
+   - 训练过程图表
 
-### Configuration
+## 🎨 可视化说明
 
-The system uses YAML configuration files. See `config/default_config.yaml` for the default configuration.
+- **左侧**: Ground Truth (真实标注)
+- **右侧**: 模型预测结果
+- **标签**: M=Mouse_bite, O=Open_circuit, S=Short, P=Spur, C=Spurious_copper
+- **颜色**: 每种瑕疵类型使用不同颜色的边界框
 
-## Testing
+## 🔧 技术特点
 
-Run tests using pytest:
+- 使用YOLOv8n模型（轻量且效果好）
+- 自动数据格式转换
+- 智能可视化（避免文字遮挡）
+- 完整的评估指标计算
+- 一键运行，无需复杂配置
 
-```bash
-# Run all tests
-pytest
+## 📝 作业提交
 
-# Run with coverage
-pytest --cov=pcb_detection
+提交以下文件即可：
+1. `evaluation_report.txt` - 性能指标和改进方法
+2. `visualization_results/` 文件夹 - 可视化对比图
+3. 这个代码项目
 
-# Run specific test module
-pytest tests/test_core/test_types.py
-```
+## ⚡ 预期性能
 
-### Property-Based Testing
+- 基线mAP约在0.005-0.01（符合作业要求）
+- 通过优化可以显著提升
+- 小瑕疵检测本身就是挑战性任务
 
-The system includes property-based tests using the Hypothesis framework to ensure correctness across a wide range of inputs.
+## 🆘 常见问题
 
-## Data Format
+**Q: 训练很慢怎么办？**
+A: 减少epochs参数，比如改为20轮
 
-The system expects data in YOLO format:
-- Images in standard formats (JPG, PNG, BMP)
-- Annotations in YOLO format: `class_id x_center y_center width height` (normalized coordinates)
+**Q: 内存不够怎么办？**  
+A: 减少batch_size，比如改为8或4
 
-### Class Mapping
+**Q: 没有GPU怎么办？**
+A: 代码默认使用CPU，会自动适配
 
-```python
-CLASS_MAPPING = {
-    0: "Mouse_bite",      # 鼠标咬痕
-    1: "Open_circuit",    # 开路
-    2: "Short",           # 短路  
-    3: "Spur",            # 毛刺
-    4: "Spurious_copper"  # 杂散铜
-}
-```
-
-## Development
-
-### Code Style
-
-The project uses:
-- Black for code formatting
-- Flake8 for linting
-- MyPy for type checking
-
-Run code quality checks:
-```bash
-black pcb_detection/
-flake8 pcb_detection/
-mypy pcb_detection/
-```
-
-### Adding New Features
-
-1. Follow the established interfaces in `pcb_detection/core/interfaces.py`
-2. Add comprehensive tests including property-based tests where applicable
-3. Update documentation and type hints
-4. Ensure all tests pass before submitting
-
-## License
-
-[Add license information here]
-
-## Contributing
-
-[Add contribution guidelines here]
+**Q: 结果不好怎么办？**
+A: 这是正常的，PCB瑕疵检测本身就很困难，报告中有改进建议

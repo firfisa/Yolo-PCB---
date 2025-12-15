@@ -1,0 +1,311 @@
+{
+  "metadata": {
+    "analysis_type": "theoretical_model_architecture_comparison",
+    "timestamp": "2025-12-15 16:11:53",
+    "total_configurations": 17,
+    "yolo_variants": 5,
+    "attention_mechanisms": 4
+  },
+  "model_specifications": [
+    {
+      "name": "yolov8n_base",
+      "variant": "yolov8n",
+      "attention_type": null,
+      "base_parameters": 3157200,
+      "base_flops": 8.7,
+      "base_size_mb": 12.0,
+      "theoretical_fps": 120,
+      "description": "Base yolov8n - Nano variant - fastest, smallest"
+    },
+    {
+      "name": "yolov8s_base",
+      "variant": "yolov8s",
+      "attention_type": null,
+      "base_parameters": 11166560,
+      "base_flops": 28.6,
+      "base_size_mb": 42.0,
+      "theoretical_fps": 85,
+      "description": "Base yolov8s - Small variant - balanced speed/accuracy"
+    },
+    {
+      "name": "yolov8m_base",
+      "variant": "yolov8m",
+      "attention_type": null,
+      "base_parameters": 25902640,
+      "base_flops": 78.9,
+      "base_size_mb": 98.0,
+      "theoretical_fps": 55,
+      "description": "Base yolov8m - Medium variant - good accuracy"
+    },
+    {
+      "name": "yolov8l_base",
+      "variant": "yolov8l",
+      "attention_type": null,
+      "base_parameters": 43691520,
+      "base_flops": 165.2,
+      "base_size_mb": 165.0,
+      "theoretical_fps": 35,
+      "description": "Base yolov8l - Large variant - high accuracy"
+    },
+    {
+      "name": "yolov8x_base",
+      "variant": "yolov8x",
+      "attention_type": null,
+      "base_parameters": 68229648,
+      "base_flops": 257.8,
+      "base_size_mb": 258.0,
+      "theoretical_fps": 25,
+      "description": "Base yolov8x - Extra large - maximum accuracy"
+    },
+    {
+      "name": "yolov8n_cbam",
+      "variant": "yolov8n",
+      "attention_type": "cbam",
+      "base_parameters": 3172985,
+      "base_flops": 8.873999999999999,
+      "base_size_mb": 12.059999999999999,
+      "theoretical_fps": 110.4,
+      "description": "yolov8n + Channel + Spatial attention, best for small objects"
+    },
+    {
+      "name": "yolov8n_se",
+      "variant": "yolov8n",
+      "attention_type": "se",
+      "base_parameters": 3163514,
+      "base_flops": 8.7435,
+      "base_size_mb": 12.024000000000001,
+      "theoretical_fps": 116.39999999999999,
+      "description": "yolov8n + Squeeze-and-Excitation, lightweight channel attention"
+    },
+    {
+      "name": "yolov8n_eca",
+      "variant": "yolov8n",
+      "attention_type": "eca",
+      "base_parameters": 3160357,
+      "base_flops": 8.726099999999999,
+      "base_size_mb": 12.011999999999999,
+      "theoretical_fps": 117.6,
+      "description": "yolov8n + Efficient Channel Attention, minimal overhead"
+    },
+    {
+      "name": "yolov8n_coord",
+      "variant": "yolov8n",
+      "attention_type": "coord",
+      "base_parameters": 3182457,
+      "base_flops": 8.961,
+      "base_size_mb": 12.096,
+      "theoretical_fps": 105.6,
+      "description": "yolov8n + Coordinate Attention, position-aware"
+    },
+    {
+      "name": "yolov8s_cbam",
+      "variant": "yolov8s",
+      "attention_type": "cbam",
+      "base_parameters": 11222392,
+      "base_flops": 29.172,
+      "base_size_mb": 42.209999999999994,
+      "theoretical_fps": 78.2,
+      "description": "yolov8s + Channel + Spatial attention, best for small objects"
+    },
+    {
+      "name": "yolov8s_se",
+      "variant": "yolov8s",
+      "attention_type": "se",
+      "base_parameters": 11188893,
+      "base_flops": 28.743,
+      "base_size_mb": 42.084,
+      "theoretical_fps": 82.45,
+      "description": "yolov8s + Squeeze-and-Excitation, lightweight channel attention"
+    },
+    {
+      "name": "yolov8s_eca",
+      "variant": "yolov8s",
+      "attention_type": "eca",
+      "base_parameters": 11177726,
+      "base_flops": 28.685799999999997,
+      "base_size_mb": 42.041999999999994,
+      "theoretical_fps": 83.3,
+      "description": "yolov8s + Efficient Channel Attention, minimal overhead"
+    },
+    {
+      "name": "yolov8s_coord",
+      "variant": "yolov8s",
+      "attention_type": "coord",
+      "base_parameters": 11255892,
+      "base_flops": 29.458000000000002,
+      "base_size_mb": 42.336,
+      "theoretical_fps": 74.8,
+      "description": "yolov8s + Coordinate Attention, position-aware"
+    },
+    {
+      "name": "yolov8m_cbam",
+      "variant": "yolov8m",
+      "attention_type": "cbam",
+      "base_parameters": 26032153,
+      "base_flops": 80.47800000000001,
+      "base_size_mb": 98.49,
+      "theoretical_fps": 50.6,
+      "description": "yolov8m + Channel + Spatial attention, best for small objects"
+    },
+    {
+      "name": "yolov8m_se",
+      "variant": "yolov8m",
+      "attention_type": "se",
+      "base_parameters": 25954445,
+      "base_flops": 79.2945,
+      "base_size_mb": 98.196,
+      "theoretical_fps": 53.35,
+      "description": "yolov8m + Squeeze-and-Excitation, lightweight channel attention"
+    },
+    {
+      "name": "yolov8m_eca",
+      "variant": "yolov8m",
+      "attention_type": "eca",
+      "base_parameters": 25928542,
+      "base_flops": 79.13669999999999,
+      "base_size_mb": 98.09799999999998,
+      "theoretical_fps": 53.9,
+      "description": "yolov8m + Efficient Channel Attention, minimal overhead"
+    },
+    {
+      "name": "yolov8m_coord",
+      "variant": "yolov8m",
+      "attention_type": "coord",
+      "base_parameters": 26109861,
+      "base_flops": 81.26700000000001,
+      "base_size_mb": 98.784,
+      "theoretical_fps": 48.4,
+      "description": "yolov8m + Coordinate Attention, position-aware"
+    }
+  ],
+  "variant_analysis": {
+    "yolov8n": {
+      "base_parameters": 3157200,
+      "base_flops": 8.7,
+      "base_size_mb": 12.0,
+      "base_fps": 120,
+      "configurations_count": 5,
+      "with_attention": 4,
+      "efficiency_score": 10.0,
+      "param_efficiency": 38.00836183960471
+    },
+    "yolov8s": {
+      "base_parameters": 11166560,
+      "base_flops": 28.6,
+      "base_size_mb": 42.0,
+      "base_fps": 85,
+      "configurations_count": 5,
+      "with_attention": 4,
+      "efficiency_score": 2.0238095238095237,
+      "param_efficiency": 7.612013010273531
+    },
+    "yolov8m": {
+      "base_parameters": 25902640,
+      "base_flops": 78.9,
+      "base_size_mb": 98.0,
+      "base_fps": 55,
+      "configurations_count": 5,
+      "with_attention": 4,
+      "efficiency_score": 0.5612244897959183,
+      "param_efficiency": 2.1233356908793852
+    },
+    "yolov8l": {
+      "base_parameters": 43691520,
+      "base_flops": 165.2,
+      "base_size_mb": 165.0,
+      "base_fps": 35,
+      "configurations_count": 1,
+      "with_attention": 0,
+      "efficiency_score": 0.21212121212121213,
+      "param_efficiency": 0.8010707798675808
+    },
+    "yolov8x": {
+      "base_parameters": 68229648,
+      "base_flops": 257.8,
+      "base_size_mb": 258.0,
+      "base_fps": 25,
+      "configurations_count": 1,
+      "with_attention": 0,
+      "efficiency_score": 0.09689922480620156,
+      "param_efficiency": 0.36640962884639244
+    }
+  },
+  "attention_analysis": {
+    "cbam": {
+      "avg_param_increase": 0.49998679666517504,
+      "avg_fps_decrease": 7.9999999999999964,
+      "avg_size_increase": 0.4999999999999898,
+      "configurations_count": 3,
+      "description": "Channel + Spatial attention, best for small objects"
+    },
+    "se": {
+      "avg_param_increase": 0.19999505831267514,
+      "avg_fps_decrease": 3.0,
+      "avg_size_increase": 0.20000000000000437,
+      "configurations_count": 3,
+      "description": "Squeeze-and-Excitation, lightweight channel attention"
+    },
+    "eca": {
+      "avg_param_increase": 0.09999539316970907,
+      "avg_fps_decrease": 2.000000000000004,
+      "avg_size_increase": 0.09999999999998677,
+      "configurations_count": 3,
+      "description": "Efficient Channel Attention, minimal overhead"
+    },
+    "coord": {
+      "avg_param_increase": 0.7999920779991051,
+      "avg_fps_decrease": 12.000000000000002,
+      "avg_size_increase": 0.800000000000001,
+      "configurations_count": 3,
+      "description": "Coordinate Attention, position-aware"
+    }
+  },
+  "optimal_configurations": {
+    "fastest": {
+      "name": "yolov8n_base",
+      "variant": "yolov8n",
+      "attention": null,
+      "fps": 120,
+      "parameters": 3157200,
+      "size_mb": 12.0
+    },
+    "smallest": {
+      "name": "yolov8n_base",
+      "variant": "yolov8n",
+      "attention": null,
+      "fps": 120,
+      "parameters": 3157200,
+      "size_mb": 12.0
+    },
+    "most_efficient": {
+      "name": "yolov8n_base",
+      "variant": "yolov8n",
+      "attention": null,
+      "fps": 120,
+      "size_mb": 12.0,
+      "efficiency": 10.0
+    },
+    "best_with_attention": {
+      "name": "yolov8n_eca",
+      "variant": "yolov8n",
+      "attention": "eca",
+      "fps": 117.6,
+      "size_mb": 12.011999999999999
+    },
+    "balanced": {
+      "name": "yolov8n_base",
+      "variant": "yolov8n",
+      "attention": null,
+      "fps": 120,
+      "size_mb": 12.0,
+      "balance_score": 1.0
+    }
+  },
+  "recommendations": {
+    "speed_focused": "For maximum inference speed: yolov8n_base (120 FPS theoretical)",
+    "memory_constrained": "For minimal memory usage: yolov8n_base (12.0MB, 120 FPS)",
+    "production": "For production deployment: yolov8n_base (balance score: 1.000)",
+    "attention_choice": "Best attention mechanism: eca (2.0% speed impact)",
+    "variant_progression": "Recommended variant progression: yolov8n \u2192 yolov8s \u2192 yolov8m"
+  }
+}

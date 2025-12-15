@@ -1,0 +1,33 @@
+PCB Defect Detection - Model Architecture Analysis
+============================================================
+
+YOLO Variant Comparison:
+------------------------------
+yolov8n :    120 FPS,   12.0MB,   3.2M params, Eff: 10.0
+yolov8s :     85 FPS,   42.0MB,  11.2M params, Eff: 2.0
+yolov8m :     55 FPS,   98.0MB,  25.9M params, Eff: 0.6
+yolov8l :     35 FPS,  165.0MB,  43.7M params, Eff: 0.2
+yolov8x :     25 FPS,  258.0MB,  68.2M params, Eff: 0.1
+
+Attention Mechanism Impact:
+-----------------------------------
+cbam    : + 0.5% params, - 8.0% speed, + 0.5% size
+se      : + 0.2% params, - 3.0% speed, + 0.2% size
+eca     : + 0.1% params, - 2.0% speed, + 0.1% size
+coord   : + 0.8% params, -12.0% speed, + 0.8% size
+
+Optimal Configurations:
+-------------------------
+Fastest             : yolov8n_base
+Smallest            : yolov8n_base
+Most Efficient      : yolov8n_base
+Best With Attention : yolov8n_eca
+Balanced            : yolov8n_base
+
+Recommendations:
+--------------------
+• For maximum inference speed: yolov8n_base (120 FPS theoretical)
+• For minimal memory usage: yolov8n_base (12.0MB, 120 FPS)
+• For production deployment: yolov8n_base (balance score: 1.000)
+• Best attention mechanism: eca (2.0% speed impact)
+• Recommended variant progression: yolov8n → yolov8s → yolov8m
