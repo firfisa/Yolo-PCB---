@@ -2,8 +2,12 @@
 
 from .dataset import PCBDataset
 from .augmentation import DataAugmentation
+from .preprocessing import DatasetSplitter, ImagePreprocessor, create_balanced_dataset_splits
 
 __all__ = [
     "PCBDataset",
-    "DataAugmentation",
+    "DataAugmentation", 
+    "DatasetSplitter",
+    "ImagePreprocessor",
+    "create_balanced_dataset_splits",
 ]
