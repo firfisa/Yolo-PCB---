@@ -13,12 +13,16 @@ from pathlib import Path
 
 from ..core.interfaces import DatasetInterface
 from ..core.types import CLASS_MAPPING, CLASS_NAME_TO_ID, NUM_CLASSES
+from .augmentation import DataAugmentation
+from .advanced_augmentation import PCBAdvancedAugmentation
 
 
 class PCBDataset(Dataset, DatasetInterface):
     """PCB dataset for loading and processing PCB defect data."""
     
-    def __init__(self, data_path: str, mode: str = "train", image_size: int = 640):
+    def __init__(self, data_path: str, mode: str = "train", image_size: int = 640, 
+                 augmentation_config: Optional[Dict] = None, 
+                 use_advanced_augmentation: bool = False):
         """
         Initialize PCB dataset.
         
@@ -26,10 +30,34 @@ class PCBDataset(Dataset, DatasetInterface):
             data_path: Path to dataset directory
             mode: Dataset mode ('train', 'val', 'test')
             image_size: Target image size for resizing
+            augmentation_config: Configuration for data augmentation
+            use_advanced_augmentation: Whether to use advanced augmentation techniques
         """
         self.data_path = Path(data_path)
         self.mode = mode
         self.image_size = image_size
+        self.use_advanced_augmentation = use_advanced_augmentation
+        
+        # Initialize augmentation
+        self.augmentation = None
+        self.advanced_augmentation = None
+        
+        if augmentation_config and mode == "train":
+            # Basic augmentation
+            basic_config = augmentation_config.get('basic', {})
+            if basic_config:
+                self.augmentation = DataAugmentation(basic_config)
+            
+            # Advanced augmentation
+            if use_advanced_augmentation:
+                advanced_config = augmentation_config.get('advanced', {})
+                self.advanced_augmentation = PCBAdvancedAugmentation(
+                    image_size=image_size,
+                    mosaic_prob=advanced_config.get('mosaic_prob', 0.5),
+                    copy_paste_prob=advanced_config.get('copy_paste_prob', 0.3),
+                    mixup_prob=advanced_config.get('mixup_prob', 0.2),
+                    use_albumentations=advanced_config.get('use_albumentations', True)
+                )
         
         # Load and validate data
         self.annotations = self.load_annotations()
@@ -44,6 +72,13 @@ class PCBDataset(Dataset, DatasetInterface):
         
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
         """Get item by index."""
+        if self.use_advanced_augmentation and self.advanced_augmentation and self.mode == "train":
+            return self._get_item_with_advanced_augmentation(idx)
+        else:
+            return self._get_item_basic(idx)
+    
+    def _get_item_basic(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Get item with basic augmentation."""
         annotation = self.annotations[idx]
         image_path = self.image_paths[idx]
         
@@ -55,6 +90,12 @@ class PCBDataset(Dataset, DatasetInterface):
         # Convert BGR to RGB
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         
+        # Apply basic augmentation if available
+        if self.augmentation:
+            image, objects = self.augmentation.apply_augmentation(image, annotation['objects'])
+        else:
+            objects = annotation['objects']
+        
         # Resize image while maintaining aspect ratio
         image, scale_factor = self._resize_image(image)
         
@@ -62,7 +103,63 @@ class PCBDataset(Dataset, DatasetInterface):
         image_tensor = torch.from_numpy(image).permute(2, 0, 1).float() / 255.0
         
         # Process annotations
-        targets = self._process_annotations(annotation['objects'], scale_factor)
+        targets = self._process_annotations(objects, scale_factor)
+        
+        return image_tensor, targets
+    
+    def _get_item_with_advanced_augmentation(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Get item with advanced augmentation techniques."""
+        # For advanced augmentation, we may need multiple images
+        images = []
+        annotations_list = []
+        
+        # Get primary image
+        primary_annotation = self.annotations[idx]
+        primary_image_path = self.image_paths[idx]
+        
+        primary_image = cv2.imread(str(primary_image_path))
+        if primary_image is None:
+            raise ValueError(f"Could not load image: {primary_image_path}")
+        
+        primary_image = cv2.cvtColor(primary_image, cv2.COLOR_BGR2RGB)
+        images.append(primary_image)
+        annotations_list.append(primary_annotation['objects'])
+        
+        # For mosaic and mixup, get additional images
+        if len(self.annotations) > 1:
+            # Get 3 more random images for mosaic (total 4)
+            import random
+            additional_indices = random.sample(
+                [i for i in range(len(self.annotations)) if i != idx], 
+                min(3, len(self.annotations) - 1)
+            )
+            
+            for add_idx in additional_indices:
+                add_annotation = self.annotations[add_idx]
+                add_image_path = self.image_paths[add_idx]
+                
+                add_image = cv2.imread(str(add_image_path))
+                if add_image is not None:
+                    add_image = cv2.cvtColor(add_image, cv2.COLOR_BGR2RGB)
+                    images.append(add_image)
+                    annotations_list.append(add_annotation['objects'])
+        
+        # Apply advanced augmentation
+        augmented_image, augmented_objects = self.advanced_augmentation(images, annotations_list)
+        
+        # Apply basic augmentation if available (after advanced)
+        if self.augmentation:
+            augmented_image, augmented_objects = self.augmentation.apply_augmentation(
+                augmented_image, augmented_objects)
+        
+        # Resize image while maintaining aspect ratio
+        augmented_image, scale_factor = self._resize_image(augmented_image)
+        
+        # Convert to tensor and normalize
+        image_tensor = torch.from_numpy(augmented_image).permute(2, 0, 1).float() / 255.0
+        
+        # Process annotations
+        targets = self._process_annotations(augmented_objects, scale_factor)
         
         return image_tensor, targets
         
@@ -370,3 +467,88 @@ class PCBDataset(Dataset, DatasetInterface):
                     distribution[class_name] += 1
                     
         return distribution
+
+
+def create_pcb_dataset_with_advanced_augmentation(
+    data_path: str, 
+    mode: str = "train", 
+    image_size: int = 640,
+    config_type: str = "balanced"
+) -> PCBDataset:
+    """
+    Create PCB dataset with advanced augmentation configuration.
+    
+    Args:
+        data_path: Path to dataset directory
+        mode: Dataset mode ('train', 'val', 'test')
+        image_size: Target image size
+        config_type: Configuration type ('basic', 'balanced', 'performance')
+        
+    Returns:
+        PCBDataset with appropriate augmentation configuration
+    """
+    # Define augmentation configurations
+    augmentation_configs = {
+        'basic': {
+            'basic': {
+                'rotation_range': (-10, 10),
+                'scale_range': (0.9, 1.1),
+                'brightness_range': (-0.1, 0.1),
+                'contrast_range': (0.9, 1.1),
+                'flip_horizontal': True,
+                'flip_vertical': False,
+                'augmentation_prob': 0.5
+            },
+            'advanced': {
+                'mosaic_prob': 0.0,
+                'copy_paste_prob': 0.0,
+                'mixup_prob': 0.0,
+                'use_albumentations': False
+            }
+        },
+        'balanced': {
+            'basic': {
+                'rotation_range': (-15, 15),
+                'scale_range': (0.8, 1.2),
+                'brightness_range': (-0.2, 0.2),
+                'contrast_range': (0.8, 1.2),
+                'flip_horizontal': True,
+                'flip_vertical': True,
+                'augmentation_prob': 0.6
+            },
+            'advanced': {
+                'mosaic_prob': 0.3,
+                'copy_paste_prob': 0.2,
+                'mixup_prob': 0.1,
+                'use_albumentations': True
+            }
+        },
+        'performance': {
+            'basic': {
+                'rotation_range': (-20, 20),
+                'scale_range': (0.7, 1.3),
+                'brightness_range': (-0.3, 0.3),
+                'contrast_range': (0.7, 1.3),
+                'flip_horizontal': True,
+                'flip_vertical': True,
+                'augmentation_prob': 0.8
+            },
+            'advanced': {
+                'mosaic_prob': 0.5,
+                'copy_paste_prob': 0.3,
+                'mixup_prob': 0.2,
+                'use_albumentations': True
+            }
+        }
+    }
+    
+    config = augmentation_configs.get(config_type, augmentation_configs['balanced'])
+    use_advanced = any(config['advanced'].values()) if isinstance(config['advanced'], dict) else False
+    
+    return PCBDataset(
+        data_path=data_path,
+        mode=mode,
+        image_size=image_size,
+        augmentation_config=config,
+        use_advanced_augmentation=use_advanced
+    )

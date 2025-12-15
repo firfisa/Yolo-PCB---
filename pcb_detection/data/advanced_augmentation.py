@@ -6,10 +6,18 @@ import cv2
 import numpy as np
 import random
 from typing import List, Dict, Tuple, Optional
-import albumentations as A
-from albumentations.pytorch import ToTensorV2
 
 from ..core.types import CLASS_MAPPING
+
+# Optional imports for advanced augmentation
+try:
+    import albumentations as A
+    from albumentations.pytorch import ToTensorV2
+    ALBUMENTATIONS_AVAILABLE = True
+except ImportError:
+    A = None
+    ToTensorV2 = None
+    ALBUMENTATIONS_AVAILABLE = False
 
 
 class MosaicAugmentation:
@@ -248,11 +256,15 @@ class AlbumentationsAugmentation:
             image_size: Target image size
             train: Whether this is for training (more aggressive augmentation)
         """
+        if not ALBUMENTATIONS_AVAILABLE:
+            raise ImportError("Albumentations is required for AlbumentationsAugmentation. "
+                            "Install it with: pip install albumentations")
+        
         self.image_size = image_size
         
         if train:
             self.transform = A.Compose([
-                A.RandomResizedCrop(image_size, image_size, scale=(0.8, 1.0), ratio=(0.9, 1.11), p=0.5),
+                A.RandomResizedCrop((image_size, image_size), scale=(0.8, 1.0), ratio=(0.9, 1.11), p=0.5),
                 A.HorizontalFlip(p=0.5),
                 A.VerticalFlip(p=0.5),
                 A.RandomRotate90(p=0.5),
@@ -275,8 +287,8 @@ class AlbumentationsAugmentation:
                 ], p=0.3),
                 A.HueSaturationValue(p=0.3),
                 A.RandomGamma(p=0.2),
-                A.CoarseDropout(max_holes=8, max_height=32, max_width=32, 
-                               min_holes=1, min_height=8, min_width=8, p=0.2),
+                A.CoarseDropout(num_holes_range=(1, 8), hole_height_range=(8, 32), 
+                               hole_width_range=(8, 32), p=0.2),
             ], bbox_params=A.BboxParams(format='yolo', label_fields=['class_labels']))
         else:
             self.transform = A.Compose([
@@ -296,7 +308,11 @@ class AlbumentationsAugmentation:
             Tuple of (augmented_image, augmented_annotations)
         """
         if not annotations:
-            transformed = self.transform(image=image)
+            # For empty annotations, use a transform without bbox_params
+            simple_transform = A.Compose([
+                A.Resize(self.image_size, self.image_size),
+            ])
+            transformed = simple_transform(image=image)
             return transformed['image'], []
             
         # Prepare bboxes and labels for Albumentations
@@ -351,10 +367,12 @@ class PCBAdvancedAugmentation:
         self.copy_paste = CopyPasteAugmentation(copy_paste_prob)
         self.mixup = MixUpAugmentation(prob=mixup_prob)
         
-        if use_albumentations:
+        if use_albumentations and ALBUMENTATIONS_AVAILABLE:
             self.albumentations = AlbumentationsAugmentation(image_size, train=True)
         else:
             self.albumentations = None
+            if use_albumentations and not ALBUMENTATIONS_AVAILABLE:
+                print("Warning: Albumentations not available. Skipping Albumentations augmentation.")
             
     def __call__(self, images: List[np.ndarray], 
                  annotations_list: List[List[Dict]]) -> Tuple[np.ndarray, List[Dict]]:
