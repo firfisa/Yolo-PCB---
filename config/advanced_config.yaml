@@ -1,0 +1,263 @@
+# PCB瑕疵检测高级技术配置文件
+
+# 基础配置 - 快速原型和基线建立
+basic_config:
+  model:
+    backbone: "yolov8n"
+    attention: "se"  # SE Block - 轻量级
+    use_fpn: false
+  
+  loss:
+    classification: "focal"  # Focal Loss
+    bbox_regression: "ciou"  # CIoU Loss
+    objectness: "bce"
+    weights:
+      cls: 1.0
+      bbox: 1.0
+      obj: 1.0
+  
+  augmentation:
+    basic:
+      rotation_range: [-10, 10]
+      scale_range: [0.9, 1.1]
+      brightness_range: [-0.1, 0.1]
+      contrast_range: [0.9, 1.1]
+      flip_horizontal: true
+      flip_vertical: false
+      prob: 0.5
+    
+    advanced:
+      mosaic_prob: 0.0
+      copy_paste_prob: 0.0
+      mixup_prob: 0.0
+      use_albumentations: false
+  
+  training:
+    epochs: 100
+    batch_size: 16
+    learning_rate: 0.01
+    multi_scale: false
+    image_size: 640
+  
+  inference:
+    confidence_threshold: 0.25
+    iou_threshold: 0.45
+    use_tta: false
+
+# 平衡配置 - 精度与速度兼顾
+balanced_config:
+  model:
+    backbone: "yolov8m"
+    attention: "cbam"  # CBAM注意力
+    use_fpn: true
+  
+  loss:
+    classification: "focal"
+    bbox_regression: "ciou"
+    objectness: "bce"
+    weights:
+      cls: 1.0
+      bbox: 2.0  # 增加bbox权重，关注小目标
+      obj: 1.0
+    focal_params:
+      alpha: 1.0
+      gamma: 2.0
+  
+  augmentation:
+    basic:
+      rotation_range: [-15, 15]
+      scale_range: [0.8, 1.2]
+      brightness_range: [-0.2, 0.2]
+      contrast_range: [0.8, 1.2]
+      flip_horizontal: true
+      flip_vertical: true
+      prob: 0.6
+    
+    advanced:
+      mosaic_prob: 0.3
+      copy_paste_prob: 0.2
+      mixup_prob: 0.1
+      use_albumentations: true
+  
+  training:
+    epochs: 200
+    batch_size: 16
+    learning_rate: 0.01
+    multi_scale: false
+    image_size: 640
+    warmup_epochs: 5
+    lr_scheduler: "cosine"
+  
+  inference:
+    confidence_threshold: 0.2
+    iou_threshold: 0.5
+    use_tta: false
+
+# 性能配置 - 追求最高精度
+performance_config:
+  model:
+    backbone: "yolov8l"
+    attention: "cbam"  # CBAM注意力
+    use_fpn: true
+    use_panet: true
+  
+  loss:
+    classification: "combo"  # 组合损失
+    bbox_regression: "ciou"
+    objectness: "bce"
+    weights:
+      cls: 1.0
+      bbox: 3.0  # 更高的bbox权重
+      obj: 1.0
+    focal_params:
+      alpha: 1.0
+      gamma: 2.0
+    class_balanced: true
+  
+  augmentation:
+    basic:
+      rotation_range: [-20, 20]
+      scale_range: [0.7, 1.3]
+      brightness_range: [-0.3, 0.3]
+      contrast_range: [0.7, 1.3]
+      flip_horizontal: true
+      flip_vertical: true
+      prob: 0.8
+    
+    advanced:
+      mosaic_prob: 0.5
+      copy_paste_prob: 0.3
+      mixup_prob: 0.2
+      use_albumentations: true
+      progressive_augmentation: true  # 渐进式增强
+  
+  training:
+    epochs: 300
+    batch_size: 8  # 更大模型使用更小batch
+    learning_rate: 0.008
+    multi_scale: true
+    image_size: 640
+    scale_range: [0.5, 1.5]
+    warmup_epochs: 10
+    lr_scheduler: "cosine"
+    early_stopping: true
+    patience: 50
+  
+  inference:
+    confidence_threshold: 0.15
+    iou_threshold: 0.5
+    use_tta: true
+    tta_scales: [0.8, 1.0, 1.2]
+    tta_flips: [false, true]
+
+# 实验配置 - 用于消融实验
+experiment_configs:
+  # 仅CBAM注意力
+  cbam_only:
+    base: "basic_config"
+    model:
+      attention: "cbam"
+  
+  # 仅高级损失
+  advanced_loss_only:
+    base: "basic_config"
+    loss:
+      classification: "combo"
+      weights:
+        bbox: 2.0
+  
+  # 仅高级增强
+  advanced_aug_only:
+    base: "basic_config"
+    augmentation:
+      advanced:
+        mosaic_prob: 0.5
+        copy_paste_prob: 0.3
+  
+  # 多尺度训练
+  multi_scale_only:
+    base: "basic_config"
+    training:
+      multi_scale: true
+      scale_range: [0.5, 1.5]
+
+# 部署配置 - 针对不同部署场景
+deployment_configs:
+  # 边缘设备 - 优先速度
+  edge_device:
+    model:
+      backbone: "yolov8n"
+      attention: "se"  # 轻量级注意力
+      use_fpn: false
+    
+    inference:
+      confidence_threshold: 0.3
+      iou_threshold: 0.45
+      use_tta: false
+    
+    optimization:
+      quantization: true
+      pruning: true
+      target_fps: 30
+  
+  # 服务器部署 - 平衡精度和速度
+  server_deployment:
+    model:
+      backbone: "yolov8m"
+      attention: "cbam"
+      use_fpn: true
+    
+    inference:
+      confidence_threshold: 0.2
+      iou_threshold: 0.5
+      use_tta: false
+      batch_inference: true
+      max_batch_size: 8
+  
+  # 离线分析 - 优先精度
+  offline_analysis:
+    model:
+      backbone: "yolov8x"
+      attention: "cbam"
+      use_fpn: true
+      use_panet: true
+    
+    inference:
+      confidence_threshold: 0.1
+      iou_threshold: 0.5
+      use_tta: true
+      ensemble_models: 3
+
+# 数据集特定配置
+dataset_configs:
+  # 小瑕疵优化
+  small_defects:
+    augmentation:
+      advanced:
+        copy_paste_prob: 0.5  # 增加Copy-Paste
+        mosaic_prob: 0.6      # 增加Mosaic
+    
+    loss:
+      weights:
+        bbox: 5.0  # 大幅增加bbox权重
+    
+    training:
+      image_size: 1024  # 更大输入尺寸
+  
+  # 类别不平衡优化
+  imbalanced_classes:
+    loss:
+      classification: "class_balanced"
+      class_balanced: true
+    
+    augmentation:
+      class_specific_augmentation: true
+  
+  # 高质量数据集
+  high_quality:
+    augmentation:
+      basic:
+        prob: 0.3  # 减少增强强度
+      advanced:
+        mosaic_prob: 0.2
+        copy_paste_prob: 0.1
